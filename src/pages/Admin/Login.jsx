@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import {signInWithEmailAndPassword } from "firebase/auth";
-
-import { auth } from "../../config/firebaseconfig/firebaseconfig"; 
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { auth, db } from "../../config/firebaseconfig/firebaseconfig";
 import { useNavigate } from "react-router";
 
 const Login = () => {
@@ -12,22 +12,34 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault(); // prevent form reload
-    setError(""); // reset error
+    e.preventDefault();
+    setError("");
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      console.log("Logged in user:", user);
 
-      // redirect based on role (example)
-      // const role = "Admin"; // fetch from Firestore if needed
-      // navigate(role === "Admin" ? "/dashboard" : "/my-courses");
+      const q = query(
+        collection(db, "users"),
+        where("email", "==", user.email)
+      );
+      const querySnapshot = await getDocs(q);
 
-      navigate("/dashboard"); // default redirect
+      if (querySnapshot.empty) {
+        setError("User data not found in Firestore");
+        return;
+      }
+
+      const userData = querySnapshot.docs[0].data();
+
+      // Navigate based on role
+      userData.role.toLowerCase() === "admin"
+        ? navigate("/")
+        : navigate("/profile");
+
     } catch (err) {
       console.error(err);
-      setError(err.message);
+      setError("Login failed. Check email and password.");
     }
   };
 

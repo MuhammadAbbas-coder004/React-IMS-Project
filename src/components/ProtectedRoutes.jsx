@@ -1,54 +1,66 @@
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { auth , db } from "../config/firebaseconfig/firebaseconfig";
+import { auth, db } from "../config/firebaseconfig/firebaseconfig";
 import { useNavigate } from "react-router";
+
 const ProtectedRoutes = ({ component, role }) => {
   const [loading, setLoading] = useState(true);
   const [isAllowed, setIsAllowed] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         setIsAllowed(false);
         setLoading(false);
-        navigate('login')
+        navigate("/login");
         return;
       }
 
       try {
-        const q = query(
-          collection(db, "user"),
-          where("uid", "==", user.uid)
+        const userRoleLower = role.map(r => r.toLowerCase());
+
+        // 🔹 ADMIN CHECK
+        const adminQuery = query(
+          collection(db, "admin"),
+          where("email", "==", user.email)
         );
-
-        const snapshot = await getDocs(q);
-
-        if (snapshot.empty) {
-          setIsAllowed(false);
+        const adminSnap = await getDocs(adminQuery);
+        if (!adminSnap.empty && userRoleLower.includes("admin")) {
+          setIsAllowed(true);
           setLoading(false);
           return;
         }
 
-        const userData = snapshot.docs[0].data();
+        // 🔹 STUDENT CHECK
+        const userQuery = query(
+          collection(db, "users"),
+        where("email", "==", user.email)
+        );
+        const userSnap = await getDocs(userQuery);
 
-        if (role.includes(userData.role)) {
-          setIsAllowed(true);
+        if (!userSnap.empty) {
+          const userData = userSnap.docs[0].data();
+          if (userRoleLower.includes(userData.role.toLowerCase())) {
+            setIsAllowed(true);
+          } else {
+            setIsAllowed(false);
+          }
         } else {
           setIsAllowed(false);
         }
 
-        setLoading(false);
       } catch (err) {
         console.error(err);
         setIsAllowed(false);
+      } finally {
         setLoading(false);
       }
     });
 
     return () => unsubscribe();
-  }, [role]);
+  }, [role, navigate]);
 
   if (loading) return <h1>Loading...</h1>;
 
