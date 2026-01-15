@@ -4,7 +4,7 @@ import { Provider } from "react-redux";
 import "./index.css";
 
 // Components
-import Navbar from "./components/Navbar";
+
 import ProtectedRoutes from "./components/ProtectedRoutes";
 
 // Redux store
@@ -27,7 +27,7 @@ import Profile from "./pages/Student/Profile";
 createRoot(document.getElementById("root")).render(
   <Provider store={store}>
     <BrowserRouter>
-      <Navbar />
+
 
       <Routes>
         {/* PUBLIC */}
