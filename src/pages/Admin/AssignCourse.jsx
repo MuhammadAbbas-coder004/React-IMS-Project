@@ -8,7 +8,7 @@ const AssignCourse = () => {
   const [student, setStudent] = useState("");
   const [course, setCourse] = useState("");
 
-  // fetch students
+  // Fetch students
   useEffect(() => {
     const fetchStudents = async () => {
       const snapshot = await getDocs(collection(db, "users"));
@@ -20,7 +20,7 @@ const AssignCourse = () => {
     fetchStudents();
   }, []);
 
-  // fetch courses
+  // Fetch courses
   useEffect(() => {
     const fetchCourses = async () => {
       const snapshot = await getDocs(collection(db, "courses"));
@@ -39,6 +39,7 @@ const AssignCourse = () => {
     try {
       const selectedStudent = students.find(s => s.id === student);
 
+      // Add enrollment
       await addDoc(collection(db, "enrollments"), {
         studentId: student,
         studentName: selectedStudent.name,
@@ -46,11 +47,11 @@ const AssignCourse = () => {
         courseName: course
       });
 
-      alert("Course assigned successfully");
+      alert("Course assigned successfully!");
       setStudent("");
       setCourse("");
     } catch (err) {
-      console.log("Error assigning course:", err);
+      console.log(err);
       alert("Failed to assign course");
     }
   };
@@ -62,11 +63,7 @@ const AssignCourse = () => {
       {/* Student Dropdown */}
       <div style={{ marginBottom: "20px" }}>
         <label>Select Student:</label>
-        <select
-          value={student}
-          onChange={(e) => setStudent(e.target.value)}
-          style={{ width: "100%", padding: "8px" }}
-        >
+        <select value={student} onChange={e => setStudent(e.target.value)} style={{ width: "100%", padding: "8px" }}>
           <option value="">--Select Student--</option>
           {students.map(s => (
             <option key={s.id} value={s.id}>{s.name}</option>
@@ -77,11 +74,7 @@ const AssignCourse = () => {
       {/* Course Dropdown */}
       <div style={{ marginBottom: "30px" }}>
         <label>Select Course:</label>
-        <select
-          value={course}
-          onChange={(e) => setCourse(e.target.value)}
-          style={{ width: "100%", padding: "8px" }}
-        >
+        <select value={course} onChange={e => setCourse(e.target.value)} style={{ width: "100%", padding: "8px" }}>
           <option value="">--Select Course--</option>
           {courses.map((c, i) => (
             <option key={i} value={c}>{c}</option>
@@ -89,17 +82,7 @@ const AssignCourse = () => {
         </select>
       </div>
 
-      <button
-        onClick={handleAssign}
-        style={{
-          width: "100%",
-          padding: "10px",
-          backgroundColor: "#3b82f6",
-          color: "#fff",
-          border: "none",
-          borderRadius: "4px",
-        }}
-      >
+      <button onClick={handleAssign} style={{ width: "100%", padding: "10px", backgroundColor: "#3b82f6", color: "#fff", border: "none", borderRadius: "4px" }}>
         Assign Course
       </button>
     </div>

@@ -18,7 +18,7 @@ import Courses from "./pages/Admin/courses/Courses";
 import AddCourse from "./pages/Admin/courses/AddCourse";
 import Student from "./pages/Admin/student/Student";
 import AddStudent from "./pages/Admin/student/AddStudent";
-import StudentDashboard from "./pages/Admin/student/StudentDashboard";
+
 
 // Student Pages
 import MyCourse from "./pages/Student/MyCourse";
@@ -50,12 +50,6 @@ createRoot(document.getElementById("root")).render(
           path="/students/add"
           element={<ProtectedRoutes role={['admin']} component={<AddStudent />} />}
         />
-
-        <Route
-          path="/students/dashboard"
-          element={<ProtectedRoutes role={['admin']} component={<StudentDashboard />} />}
-        />
-
         <Route
           path="/courses"
           element={<ProtectedRoutes role={['admin']} component={<Courses />} />}
