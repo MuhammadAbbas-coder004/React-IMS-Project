@@ -21,7 +21,7 @@ const ProtectedRoutes = ({ component, role }) => {
       try {
         const userRoleLower = role.map(r => r.toLowerCase());
 
-        // 🔹 ADMIN CHECK
+        //ADMIN CHECK
         const adminQuery = query(
           collection(db, "admin"),
           where("email", "==", user.email)
@@ -33,7 +33,7 @@ const ProtectedRoutes = ({ component, role }) => {
           return;
         }
 
-        // 🔹 STUDENT CHECK
+        // STUDENT CHECK
         const userQuery = query(
           collection(db, "users"),
         where("email", "==", user.email)
