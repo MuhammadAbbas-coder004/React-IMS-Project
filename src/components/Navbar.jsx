@@ -21,7 +21,7 @@ const Sidebar = () => {
       {/* Menu */}
       <nav className="flex-1 mt-6 flex flex-col gap-2 px-4">
         <Link
-          to="/dashboard"
+          to="/"
           className="text-left py-2 px-3 rounded hover:bg-gray-700 transition"
         >
           Dashboard
