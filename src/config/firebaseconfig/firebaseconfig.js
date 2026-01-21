@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
+// Primary Firebase App
 const firebaseConfig = {
   apiKey: "AIzaSyCgY0KBh4zvmlUqBu6CKe_HGeXYhHT54z4",
   authDomain: "react-4cdcb.firebaseapp.com",
@@ -15,3 +16,10 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Secondary Firebase App (for creating students without logging out admin)
+import { initializeApp as initializeSecondaryApp } from "firebase/app";
+import { getAuth as getSecondaryAuth } from "firebase/auth";
+
+const secondaryApp = initializeSecondaryApp(firebaseConfig, "Secondary");
+export const secondaryAuth = getSecondaryAuth(secondaryApp);
