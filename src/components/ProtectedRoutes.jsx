@@ -20,8 +20,6 @@ const ProtectedRoutes = ({ component, role }) => {
 
       try {
         const userRoleLower = role.map(r => r.toLowerCase());
-
-        //ADMIN CHECK
         const adminQuery = query(
           collection(db, "admin"),
           where("email", "==", user.email)

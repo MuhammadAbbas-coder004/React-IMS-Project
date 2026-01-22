@@ -6,127 +6,100 @@ import { auth, db } from "../../config/firebaseconfig/firebaseconfig";
 const StudentProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        setLoading(false);
-        setError("Please log in first");
-        return;
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+
+      const q = query(
+        collection(db, "users"),
+        where("email", "==", user.email)
+      );
+      const snap = await getDocs(q);
+
+      if (!snap.empty) {
+        setProfile({
+          ...snap.docs[0].data(),
+          image: "https://cdn-icons-png.flaticon.com/512/219/219986.png",
+        });
       }
-
-      try {
-        const email = user.email;
-        console.log("🔍 Fetching profile for:", email);
-
-        // Get Student Profile by Email
-        const userQuery = query(
-          collection(db, "users"),
-          where("email", "==", email)
-        );
-        const userSnap = await getDocs(userQuery);
-
-        if (userSnap.empty) {
-          setError("Profile not found");
-          setLoading(false);
-          return;
-        }
-
-        const studentData = {
-          id: userSnap.docs[0].id,
-          ...userSnap.docs[0].data()
-        };
-        setProfile(studentData);
-        console.log("✅ Student Profile:", studentData);
-
-      } catch (err) {
-        console.error("❌ Error:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+      setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => unsub();
   }, []);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-xl text-gray-700 font-medium">Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="max-w-3xl mx-auto mt-10 p-6 bg-red-50 rounded-xl border-2 border-red-300">
-        <div className="text-center">
-          <div className="text-5xl mb-4">❌</div>
-          <p className="text-red-700 font-semibold text-lg">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <div className="max-w-3xl mx-auto mt-10 p-6 bg-yellow-50 rounded-xl border-2 border-yellow-300">
-        <div className="text-center">
-          <div className="text-5xl mb-4">⚠️</div>
-          <p className="text-yellow-700 font-semibold text-lg">Profile not found</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-3xl mx-auto">
-        
-        {/* Profile Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-          
-          {/* Header with Avatar */}
-          <div className="flex items-center justify-center mb-8">
-            <div className="w-24 h-24 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center border-4 border-blue-200 shadow-lg">
-              <span className="text-4xl font-bold text-white">
-                {profile.name?.charAt(0).toUpperCase()}
-              </span>
-            </div>
+    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 pt-16">
+
+      {/* BLUE WELCOME CARD */}
+      <div className="max-w-5xl mx-auto mb-10">
+        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl shadow-lg p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+
+          {/* LEFT TEXT */}
+          <div className="text-white text-center sm:text-left">
+            <h1 className="text-2xl sm:text-3xl font-bold">
+              Welcome, {profile.name} 👋
+            </h1>
+            <p className="text-sm sm:text-base text-blue-100 mt-2">
+              Here is your student profile dashboard
+            </p>
           </div>
 
-          {/* Profile Info */}
-          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-            Student Profile
-          </h2>
+          {/* RIGHT IMAGE */}
+          <img
+            src={profile.image}
+            alt="student"
+            className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-white p-2 shadow-xl"
+          />
+        </div>
+      </div>
 
-          <div className="space-y-5">
-            
-            {/* Name */}
-            <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-500 mb-2 font-medium">Name</p>
-              <p className="text-xl font-semibold text-gray-800">{profile.name}</p>
-            </div>
+      {/* INFO CARDS (NO CHANGE) */}
+      <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-            {/* Email */}
-            <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-500 mb-2 font-medium">Email</p>
-              <p className="text-xl font-semibold text-gray-800">{profile.email}</p>
-            </div>
+        <div className="bg-white rounded-2xl p-5 shadow hover:shadow-lg transition">
+          <p className="text-xs text-gray-500 uppercase tracking-wide">
+            Full Name
+          </p>
+          <p className="text-lg font-semibold text-gray-800 mt-1">
+            {profile.name}
+          </p>
+        </div>
 
-            {/* Role */}
-            <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-500 mb-2 font-medium">Role</p>
-              <p className="text-xl font-semibold text-gray-800 capitalize">{profile.role}</p>
-            </div>
+        <div className="bg-white rounded-2xl p-5 shadow hover:shadow-lg transition">
+          <p className="text-xs text-gray-500 uppercase tracking-wide">
+            Email
+          </p>
+          <p className="text-lg font-semibold text-gray-800 mt-1 break-all">
+            {profile.email}
+          </p>
+        </div>
 
-          </div>
+        <div className="bg-white rounded-2xl p-5 shadow hover:shadow-lg transition">
+          <p className="text-xs text-gray-500 uppercase tracking-wide">
+            Role
+          </p>
+          <p className="text-lg font-semibold text-gray-800 mt-1 capitalize">
+            {profile.role}
+          </p>
+        </div>
 
+        <div className="bg-white rounded-2xl p-5 shadow hover:shadow-lg transition">
+          <p className="text-xs text-gray-500 uppercase tracking-wide">
+            Account Status
+          </p>
+          <p className="text-lg font-semibold text-green-600 mt-1">
+            Verified Student
+          </p>
         </div>
 
       </div>

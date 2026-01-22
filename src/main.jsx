@@ -35,7 +35,7 @@ createRoot(document.getElementById("root")).render(
 
         {/* ADMIN ROUTES */}
         <Route
-          index                 // 🚀 index route
+          index          
           element={
             <ProtectedRoutes role={['admin']} component={<Dashboard />} />
           }

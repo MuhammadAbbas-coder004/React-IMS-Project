@@ -1,62 +1,89 @@
+// src/pages/Admin/ViewStudents.jsx
 import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-
-import Navbar from '../../../components/Navbar'
+import Navbar from '../../../components/Navbar';
 import { db } from "../../../config/firebaseconfig/firebaseconfig";
 
 const ViewStudents = () => {
   const [students, setStudents] = useState([]);
 
+  const fetchStudents = async () => {
+    const usersSnap = await getDocs(collection(db, "users"));
+    const studentsList = usersSnap.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(user => user.role === "student");
+
+    const enrollSnap = await getDocs(collection(db, "enrollments"));
+    const enrollments = enrollSnap.docs.map(doc => doc.data());
+
+    const finalStudents = studentsList.map(student => {
+      const myCourses = enrollments
+        .filter(e => e.studentId === student.id)
+        .map(e => e.courseName);
+      return { ...student, enrolledCourses: myCourses };
+    });
+
+    setStudents(finalStudents);
+  };
+
   useEffect(() => {
-    const fetchStudents = async () => {
-      // 1️⃣ Get all students
-      const usersSnap = await getDocs(collection(db, "users"));
-      const studentsList = usersSnap.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(user => user.role === "student");
-
-      // 2️⃣ Get enrollments
-      const enrollSnap = await getDocs(collection(db, "enrollments"));
-      const enrollments = enrollSnap.docs.map(doc => doc.data());
-
-      // 3️⃣ Attach courses
-      const finalStudents = studentsList.map(student => {
-        const myCourses = enrollments
-          .filter(e => e.studentId === student.id)
-          .map(e => e.courseName);
-        return {
-          ...student,
-          enrolledCourses: myCourses,
-        };
-      });
-
-      setStudents(finalStudents);
-    };
-
-    fetchStudents();
+    (async () => {
+      await fetchStudents();
+    })();
   }, []);
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <Navbar />
 
-      <div className="flex-1 p-6">
-        <h2 className="text-2xl font-bold mb-6">All Students</h2>
+      {/* Sidebar */}
+      <div className="fixed top-0 left-0 h-full z-40">
+        <Navbar />
+      </div>
 
-        {/* Responsive Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Main Content */}
+      <div className="flex-1 ml-0 md:ml-72 p-4 sm:p-6 md:p-8 pt-12 flex flex-col items-start">
+        <h2 className="text-3xl sm:text-4xl font-extrabold mb-12 text-gray-800 text-left tracking-tight leading-snug">
+          All Students
+        </h2>
+
+        {/* Students Grid */}
+        <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center sm:justify-items-start">
           {students.map(student => (
-            <div key={student.id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition duration-300">
-              {/* Profile placeholder */}
-              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mb-4 mx-auto text-gray-500 text-xl font-bold">
+            <div
+              key={student.id}
+              className="bg-white rounded-3xl shadow-md p-6 flex flex-col items-center
+                         hover:shadow-xl transform hover:-translate-y-2 transition duration-300 w-full max-w-xs"
+            >
+              {/* Profile */}
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-gray-300 shadow-md overflow-hidden mb-5 flex items-center justify-center text-3xl sm:text-4xl font-semibold text-gray-500 bg-gray-100">
                 {student.name.charAt(0).toUpperCase()}
               </div>
 
-              <h3 className="text-xl font-semibold text-center mb-2">{student.name}</h3>
-              <p className="text-gray-600 text-center mb-2">{student.email}</p>
-              <p className="text-gray-700 text-center">
-                Courses: {student.enrolledCourses.length > 0 ? student.enrolledCourses.join(", ") : "No courses assigned"}
+              {/* Student Info */}
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 text-center sm:text-left mb-1">
+                {student.name}
+              </h3>
+              <p className="text-gray-600 text-sm sm:text-base mb-2 text-center sm:text-left">
+                {student.email}
               </p>
+
+              {/* Courses */}
+              <div className="mt-2 flex flex-wrap justify-center sm:justify-start gap-2">
+                {student.enrolledCourses.length > 0 ? (
+                  student.enrolledCourses.map((course, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-gray-100 text-gray-800 text-xs px-3 py-1 rounded-full shadow-sm"
+                    >
+                      {course}
+                    </span>
+                  ))
+                ) : (
+                  <span className="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full shadow-sm">
+                    No courses
+                  </span>
+                )}
+              </div>
             </div>
           ))}
         </div>
