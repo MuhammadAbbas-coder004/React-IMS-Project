@@ -3,27 +3,23 @@ import React, { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../config/firebaseconfig/firebaseconfig";
+import StudentNavbar from "../../components/StudentNavbar";
 
 const MyCourses = () => {
   const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userEmail, setUserEmail] = useState(null);
   const [studentName, setStudentName] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        setLoading(false);
         setError("Please log in to view your courses");
         return;
       }
 
       try {
         const email = user.email;
-        setUserEmail(email);
 
-        // get student name
         const userQuery = query(
           collection(db, "users"),
           where("email", "==", email)
@@ -33,7 +29,6 @@ const MyCourses = () => {
           setStudentName(userSnap.docs[0].data().name);
         }
 
-        // get enrollments
         const enrollQuery = query(
           collection(db, "enrollments"),
           where("studentEmail", "==", email)
@@ -42,11 +37,12 @@ const MyCourses = () => {
 
         if (enrollSnap.empty) {
           setCourses([]);
-          setLoading(false);
           return;
         }
 
-        const courseNames = enrollSnap.docs.map(d => d.data().courseName);
+        const courseNames = enrollSnap.docs.map(
+          (d) => d.data().courseName
+        );
 
         const coursesPromises = courseNames.map(async (courseName) => {
           const courseQuery = query(
@@ -55,86 +51,105 @@ const MyCourses = () => {
           );
           const courseSnap = await getDocs(courseQuery);
           if (!courseSnap.empty) {
-            return { id: courseSnap.docs[0].id, ...courseSnap.docs[0].data() };
+            return {
+              id: courseSnap.docs[0].id,
+              ...courseSnap.docs[0].data(),
+            };
           }
           return null;
         });
 
         const result = (await Promise.all(coursesPromises)).filter(Boolean);
         setCourses(result);
-      } catch (err) {
+      } catch {
         setError("Failed to load courses");
-      } finally {
-        setLoading(false);
       }
     });
 
     return () => unsubscribe();
   }, []);
 
-  /* ---------- LOADING ---------- */
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-lg font-semibold text-gray-700">
-            Preparing your learning dashboard...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   /* ---------- ERROR ---------- */
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full">
-          <div className="text-6xl mb-4">⚠️</div>
-          <p className="text-red-600 font-bold text-lg">{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="bg-white p-8 rounded-2xl shadow-lg text-center">
+          <p className="text-red-600 font-semibold">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 px-4 py-10">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 px-5 py-10 md:pl-80">
+      <div className="max-w-7xl mx-auto">
+        <StudentNavbar />
 
-        {/* HERO HEADER */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl shadow-2xl p-8 sm:p-10 mb-10 text-white flex flex-col sm:flex-row justify-between items-center gap-6">
+        {/* HERO / WELCOME (FIXED FOR MOBILE) */}
+        <div
+          className="
+          bg-gradient-to-r from-blue-600 to-indigo-600
+          text-white rounded-3xl
+          p-6 md:p-8
+          mb-10 shadow-xl
+          grid md:grid-cols-2 gap-6 items-center
+          mt-14 md:mt-0
+        "
+        >
+          {/* LEFT CONTENT */}
           <div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold mb-2">
+            <h1 className="text-2xl md:text-3xl font-extrabold mb-2 md:mb-3">
               My Courses 🎓
             </h1>
-            <p className="text-blue-100 text-lg">
-              Welcome back, {studentName || userEmail}
+            <p className="text-blue-100 text-base md:text-lg mb-2 md:mb-3">
+              Welcome back,{" "}
+              <span className="font-semibold">
+                {studentName || "Student"}
+              </span>
             </p>
-            <p className="text-sm text-blue-200 mt-1">
-              Keep learning, keep growing 
+            <p className="text-blue-100 max-w-xl text-sm md:text-base">
+              This is your personal learning area where you can access all
+              your enrolled courses and continue your journey.
             </p>
+
+            <div className="mt-4 md:mt-6 flex items-center gap-5 bg-white/20 backdrop-blur rounded-2xl px-5 py-3 w-fit">
+              <div>
+                <p className="text-xs md:text-sm text-blue-100">
+                  Total Courses
+                </p>
+                <p className="text-2xl md:text-3xl font-extrabold">
+                  {courses.length}
+                </p>
+              </div>
+              <div className="h-10 w-px bg-white/40"></div>
+              <div>
+                <p className="text-xs md:text-sm text-blue-100">Status</p>
+                <p className="font-semibold text-green-200">Active</p>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-white/20 backdrop-blur-md rounded-2xl px-8 py-6 text-center border border-white/30">
-            <p className="text-sm font-semibold text-gray-900 mb-1">
-              Enrolled Courses
-            </p>
-            <p className="text-5xl font-extrabold text-gray-900">
-              {courses.length}
-            </p>
+          {/* RIGHT IMAGE */}
+          <div className="flex justify-center md:justify-end mt-4 md:mt-0">
+            <div className="relative group">
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/219/219986.png"
+                alt="Student Profile"
+                className="w-28 h-28 md:w-52 md:h-52 rounded-full shadow-2xl transition-all duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 rounded-full ring-2 ring-white/30 group-hover:ring-blue-200 transition"></div>
+            </div>
           </div>
         </div>
 
-        {/* NO COURSES */}
+        {/* EMPTY STATE */}
         {courses.length === 0 ? (
-          <div className="bg-white rounded-3xl shadow-xl p-12 text-center">
-            <div className="text-7xl mb-4">📭</div>
+          <div className="bg-white rounded-3xl p-16 text-center shadow-lg">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              No Courses Assigned
+              No Courses Yet
             </h2>
-            <p className="text-gray-500 text-lg">
-              Ask your admin to enroll you in courses.
+            <p className="text-gray-500">
+              Once admin assigns courses, they will appear here.
             </p>
           </div>
         ) : (
@@ -144,46 +159,38 @@ const MyCourses = () => {
               {courses.map((course, index) => (
                 <div
                   key={course.id}
-                  className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-gray-200"
+                  className="group bg-white rounded-3xl shadow-md hover:shadow-2xl transition-all duration-300 border border-transparent hover:border-blue-400 hover:-translate-y-2"
                 >
-                  {/* TOP */}
-                  <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-5 text-white">
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="bg-white text-gray-900 px-4 py-1 rounded-full text-sm font-bold">
-                        #{index + 1}
-                      </span>
-                      <span className="text-2xl">📘</span>
-                    </div>
-                    <h3 className="text-xl font-extrabold leading-snug">
+                  <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-t-3xl px-6 py-5">
+                    <p className="text-xs opacity-80 mb-1">
+                      Course {index + 1}
+                    </p>
+                    <h3 className="text-lg font-bold">
                       {course.courseName}
                     </h3>
                   </div>
 
-                  {/* BODY */}
                   <div className="p-6">
                     {course.description && (
-                      <p className="text-gray-600 mb-4 leading-relaxed">
+                      <p className="text-gray-600 mb-5 leading-relaxed">
                         {course.description}
                       </p>
                     )}
 
                     {course.duration && (
-                      <div className="flex items-center bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4">
-                        <span className="text-2xl mr-3">⏳</span>
-                        <div>
-                          <p className="text-xs uppercase text-gray-500 font-semibold">
-                            Duration
-                          </p>
-                          <p className="text-lg font-bold text-blue-600">
-                            {course.duration}
-                          </p>
-                        </div>
+                      <div className="flex justify-between items-center bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
+                        <span className="text-sm text-gray-600">
+                          Duration
+                        </span>
+                        <span className="font-bold text-blue-700">
+                          {course.duration}
+                        </span>
                       </div>
                     )}
 
-                    <div className="flex justify-center">
-                      <span className="bg-green-100 text-green-700 px-6 py-2 rounded-full font-bold text-sm">
-                        ✅ ENROLLED
+                    <div className="mt-6 text-center">
+                      <span className="inline-block bg-green-100 text-green-700 px-6 py-2 rounded-full text-sm font-bold">
+                        Enrolled
                       </span>
                     </div>
                   </div>
@@ -192,25 +199,25 @@ const MyCourses = () => {
             </div>
 
             {/* SUMMARY */}
-            <div className="mt-12 bg-white rounded-3xl shadow-xl p-8">
-              <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                📊 Learning Summary
+            <div className="mt-16 bg-white rounded-3xl p-10 shadow-xl">
+              <h3 className="text-xl font-bold text-gray-800 mb-6">
+                Learning Overview
               </h3>
               <div className="grid sm:grid-cols-3 gap-6">
-                <div className="bg-blue-50 rounded-xl p-5 text-center border border-blue-200">
-                  <p className="text-sm text-gray-500 mb-1">Total Courses</p>
-                  <p className="text-4xl font-extrabold text-blue-600">
+                <div className="bg-blue-50 rounded-xl p-6 text-center hover:shadow-md transition">
+                  <p className="text-sm text-gray-500">Courses</p>
+                  <p className="text-3xl font-extrabold text-blue-600">
                     {courses.length}
                   </p>
                 </div>
-                <div className="bg-green-50 rounded-xl p-5 text-center border border-green-200">
-                  <p className="text-sm text-gray-500 mb-1">Status</p>
-                  <p className="text-xl font-bold text-green-600">Active</p>
+                <div className="bg-green-50 rounded-xl p-6 text-center hover:shadow-md transition">
+                  <p className="text-sm text-gray-500">Progress</p>
+                  <p className="font-bold text-green-600">In Progress</p>
                 </div>
-                <div className="bg-purple-50 rounded-xl p-5 text-center border border-purple-200">
-                  <p className="text-sm text-gray-500 mb-1">Student</p>
-                  <p className="text-lg font-bold text-purple-600 truncate">
-                    {studentName || "Student"}
+                <div className="bg-purple-50 rounded-xl p-6 text-center hover:shadow-md transition">
+                  <p className="text-sm text-gray-500">Student</p>
+                  <p className="font-bold text-purple-600 truncate">
+                    {studentName}
                   </p>
                 </div>
               </div>

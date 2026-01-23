@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../config/firebaseconfig/firebaseconfig";
+import StudentNavbar from "../../components/StudentNavbar";
 
 const StudentProfile = () => {
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    role: "",
+    image: "https://cdn-icons-png.flaticon.com/512/219/219986.png",
+  });
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
+    const user = auth.currentUser;
+    if (!user) return;
 
+    const getProfile = async () => {
       const q = query(
         collection(db, "users"),
         where("email", "==", user.email)
@@ -23,50 +28,45 @@ const StudentProfile = () => {
           image: "https://cdn-icons-png.flaticon.com/512/219/219986.png",
         });
       }
-      setLoading(false);
-    });
+    };
 
-    return () => unsub();
+    getProfile();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 pt-16">
+    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 pt-16 md:pl-80">
+      {/* NAVBAR */}
+      <StudentNavbar />
 
-      {/* BLUE WELCOME CARD */}
-      <div className="max-w-5xl mx-auto mb-10">
-        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl shadow-lg p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+      {/* HERO */}
+      <div className="max-w-6xl mx-auto mb-10">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl shadow-lg p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
 
-          {/* LEFT TEXT */}
-          <div className="text-white text-center sm:text-left">
-            <h1 className="text-2xl sm:text-3xl font-bold">
-              Welcome, {profile.name} 👋
+          {/* LEFT */}
+          <div className="text-white text-center md:text-left">
+            <h1 className="text-2xl md:text-3xl font-bold">
+              Welcome, {profile.name || "Student"}
             </h1>
-            <p className="text-sm sm:text-base text-blue-100 mt-2">
+            <p className="text-blue-100 mt-2 text-sm md:text-base">
               Here is your student profile dashboard
             </p>
           </div>
 
           {/* RIGHT IMAGE */}
-          <img
-            src={profile.image}
-            alt="student"
-            className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-white p-2 shadow-xl"
-          />
+          <div className="relative group">
+            <img
+              src={profile.image}
+              alt="student"
+              className="w-28 h-28 md:w-44 md:h-44 rounded-full shadow-2xl transition-all duration-300 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 rounded-full ring-2 ring-white/30 group-hover:ring-blue-200 transition"></div>
+          </div>
         </div>
       </div>
 
-      {/* INFO CARDS (NO CHANGE) */}
-      <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-        <div className="bg-white rounded-2xl p-5 shadow hover:shadow-lg transition">
+      {/* INFO CARDS */}
+      <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition">
           <p className="text-xs text-gray-500 uppercase tracking-wide">
             Full Name
           </p>
@@ -75,7 +75,7 @@ const StudentProfile = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 shadow hover:shadow-lg transition">
+        <div className="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition">
           <p className="text-xs text-gray-500 uppercase tracking-wide">
             Email
           </p>
@@ -84,7 +84,7 @@ const StudentProfile = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 shadow hover:shadow-lg transition">
+        <div className="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition">
           <p className="text-xs text-gray-500 uppercase tracking-wide">
             Role
           </p>
@@ -93,7 +93,7 @@ const StudentProfile = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 shadow hover:shadow-lg transition">
+        <div className="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition">
           <p className="text-xs text-gray-500 uppercase tracking-wide">
             Account Status
           </p>
@@ -101,7 +101,6 @@ const StudentProfile = () => {
             Verified Student
           </p>
         </div>
-
       </div>
     </div>
   );

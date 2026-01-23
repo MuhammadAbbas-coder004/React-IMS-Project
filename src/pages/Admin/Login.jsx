@@ -3,11 +3,13 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { auth, db } from "../../config/firebaseconfig/firebaseconfig";
 import { useNavigate } from "react-router";
+import { HiEye, HiEyeOff } from "react-icons/hi";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -19,10 +21,7 @@ const Login = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      const q = query(
-        collection(db, "users"),
-        where("email", "==", user.email)
-      );
+      const q = query(collection(db, "users"), where("email", "==", user.email));
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
@@ -32,11 +31,9 @@ const Login = () => {
 
       const userData = querySnapshot.docs[0].data();
 
-      // Navigate based on role
       userData.role.toLowerCase() === "admin"
         ? navigate("/")
         : navigate("/profile");
-
     } catch (err) {
       console.error(err);
       setError("Login failed. Check email and password.");
@@ -44,42 +41,73 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-sm bg-white p-6 rounded-xl shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 animate-fadeIn">
+        {/* LOGO */}
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-black text-indigo-600 tracking-wide">IMS</h1>
+          <p className="text-gray-500 mt-1 text-sm">Student & Admin Portal</p>
+        </div>
 
         {error && (
-          <div className="bg-red-100 text-red-700 p-2 rounded mb-4 text-sm">
+          <div className="bg-red-100 text-red-700 px-4 py-2 rounded-lg mb-4 text-sm text-center">
             {error}
           </div>
         )}
 
-        <form className="space-y-4" onSubmit={handleLogin}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
+        <form className="space-y-5" onSubmit={handleLogin}>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
+          {/* EMAIL */}
+          <div>
+            <label className="text-sm font-medium text-gray-600 block mb-1">
+              Email Address
+            </label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+              required
+            />
+          </div>
 
+          {/* PASSWORD */}
+          <div className="relative">
+            <label className="text-sm font-medium text-gray-600 block mb-1">
+              Password
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-indigo-500 transition pr-12"
+              required
+            />
+            {/* EYE ICON - ADJUSTED VERTICAL POSITION */}
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute top-[50%] translate-y-[-50%] right-3 flex items-center justify-center text-gray-400 hover:text-indigo-500 transition"
+            >
+              {showPassword ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* BUTTON */}
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
+            className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold text-lg hover:scale-[1.02] hover:shadow-lg transition-all duration-300"
           >
             Login
           </button>
         </form>
+
+        {/* FOOTER */}
+        <p className="text-center text-xs text-gray-500 mt-6">
+          © {new Date().getFullYear()} IMS • All rights reserved
+        </p>
       </div>
     </div>
   );
