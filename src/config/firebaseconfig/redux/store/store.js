@@ -1,6 +1,5 @@
-// src/config/firebaseconfig/redux/store/store.js
-import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "../reducers/AuthSlice"; // ✅ correct relative path
+ import { configureStore } from "@reduxjs/toolkit";
+ import authReducer from "../reducers/AuthSlice"; 
 
 export const store = configureStore({
   reducer: {
@@ -8,4 +7,4 @@ export const store = configureStore({
   }
 });
 
-export default store; // ✅ export default for Provider
+export default store;

@@ -31,10 +31,9 @@ const ProtectedRoutes = ({ component, role }) => {
           return;
         }
 
-        // STUDENT CHECK
         const userQuery = query(
           collection(db, "users"),
-        where("email", "==", user.email)
+          where("email", "==", user.email)
         );
         const userSnap = await getDocs(userQuery);
 
@@ -60,7 +59,13 @@ const ProtectedRoutes = ({ component, role }) => {
     return () => unsubscribe();
   }, [role, navigate]);
 
-  if (loading) return <h1>Loading...</h1>;
+ if (loading)
+  return (
+<div className="fixed inset-0 flex items-center justify-center bg-base-100">
+  <div className="w-12 h-12 rounded-full border-6 border-t-6 border-gray-300 border-t-purple-600 animate-spin shadow-md"></div>
+</div>
+
+  );
 
   return isAllowed ? component : <h1>Not Allowed</h1>;
 };
