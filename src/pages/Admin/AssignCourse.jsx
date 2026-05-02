@@ -112,11 +112,11 @@ const AssignCourse = () => {
                 onChange={e => setStudent(e.target.value)}
                 className="w-full px-4 py-3 sm:py-4 border border-gray-300
                            rounded-lg focus:ring-2 focus:ring-teal-400
-                           text-sm sm:text-base"
+                           text-sm sm:text-base text-black"
               >
-                <option value="">-- Select Student --</option>
+                <option value="" className="text-black">-- Select Student --</option>
                 {students.map(s => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
+                  <option key={s.id} value={s.id} className="text-black">{s.name}</option>
                 ))}
               </select>
             </div>
@@ -130,11 +130,11 @@ const AssignCourse = () => {
                 onChange={e => setCourse(e.target.value)}
                 className="w-full px-4 py-3 sm:py-4 border border-gray-300
                            rounded-lg focus:ring-2 focus:ring-teal-400
-                           text-sm sm:text-base"  
+                           text-sm sm:text-base text-black"  
               >
-                <option value="">-- Select Course --</option>
+                <option value="" className="text-black">-- Select Course --</option>
                 {courses.map((c, i) => (
-                  <option key={i} value={c}>{c}</option>
+                  <option key={i} value={c} className="text-black">{c}</option>
                 ))}
               </select>
             </div>

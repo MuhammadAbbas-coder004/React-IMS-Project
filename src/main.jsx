@@ -18,6 +18,7 @@ import Courses from "./pages/Admin/courses/Courses";
 import AddCourse from "./pages/Admin/courses/AddCourse";
 import Student from "./pages/Admin/student/Student";
 import AddStudent from "./pages/Admin/student/AddStudent";
+import Signup from "./pages/Admin/Signup";
 
 
 // Student Pages
@@ -32,6 +33,7 @@ createRoot(document.getElementById("root")).render(
       <Routes>
         {/* PUBLIC */}
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
         {/* ADMIN ROUTES */}
         <Route

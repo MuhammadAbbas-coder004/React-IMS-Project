@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, doc, setDoc } from "firebase/firestore";
 import { db, secondaryAuth } from "../../../config/firebaseconfig/firebaseconfig";
 import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import Sidebar from "../../../components/Navbar";
@@ -22,13 +22,17 @@ const AddStudent = () => {
         password
       );
       const student = userCredential.user;
-
-      await addDoc(collection(db, "users"), {
-        id: student.uid,
+      console.log("Secondary student created:", student.uid);
+ 
+      await setDoc(doc(db, "users", student.uid), {
         name,
         email,
         role: "student",
+        uid: student.uid,
+        createdAt: new Date().toISOString()
       });
+ 
+      console.log("Student data saved to Firestore");
 
       alert("Student added successfully!");
       setName("");
@@ -38,7 +42,7 @@ const AddStudent = () => {
       await signOut(secondaryAuth);
     } catch (err) {
       console.error("Error adding student:", err);
-      alert("Failed to add student");
+      alert("Failed to add student: " + (err.message || "Unknown error"));
     } finally {
       setLoading(false);
     }
@@ -85,7 +89,7 @@ const AddStudent = () => {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Enter student name"
-                className="w-full px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400"
+                className="w-full px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 text-black"
               />
             </div>
 
@@ -98,7 +102,7 @@ const AddStudent = () => {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="Enter student email"
-                className="w-full px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400"
+                className="w-full px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 text-black"
               />
             </div>
 
@@ -111,7 +115,7 @@ const AddStudent = () => {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Enter password"
-                className="w-full px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400"
+                className="w-full px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 text-black"
               />
             </div>
 

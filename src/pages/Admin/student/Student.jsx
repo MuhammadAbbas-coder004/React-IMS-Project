@@ -56,12 +56,12 @@ const ViewStudents = () => {
             >
               {/* Profile */}
               <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-gray-300 shadow-md overflow-hidden mb-5 flex items-center justify-center text-3xl sm:text-4xl font-semibold text-gray-500 bg-gray-100">
-                {student.name.charAt(0).toUpperCase()}
+                {(student.name || student.email || "S").charAt(0).toUpperCase()}
               </div>
 
               {/* Student Info */}
               <h3 className="text-lg sm:text-xl font-semibold text-gray-800 text-center sm:text-left mb-1">
-                {student.name}
+                {student.name || "Unnamed Student"}
               </h3>
               <p className="text-gray-600 text-sm sm:text-base mb-2 text-center sm:text-left">
                 {student.email}

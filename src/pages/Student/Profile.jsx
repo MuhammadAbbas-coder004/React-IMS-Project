@@ -75,14 +75,6 @@ const StudentProfile = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">
-            Email
-          </p>
-          <p className="text-lg font-semibold text-gray-800 mt-1 break-all">
-            {profile.email}
-          </p>
-        </div>
 
         <div className="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition">
           <p className="text-xs text-gray-500 uppercase tracking-wide">

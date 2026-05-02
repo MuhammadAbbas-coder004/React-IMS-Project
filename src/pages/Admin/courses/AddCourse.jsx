@@ -72,7 +72,7 @@ const AddCourse = () => {
                 placeholder="Enter course name"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg
                            focus:outline-none focus:ring-2 focus:ring-purple-400
-                           text-sm sm:text-base"
+                           text-sm sm:text-base text-black"
               />
             </div>
 
@@ -86,7 +86,7 @@ const AddCourse = () => {
                 placeholder="Enter course description"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg
                            focus:outline-none focus:ring-2 focus:ring-purple-400
-                           text-sm sm:text-base resize-none"
+                           text-sm sm:text-base resize-none text-black"
               />
             </div>
 
@@ -101,7 +101,7 @@ const AddCourse = () => {
                 placeholder="e.g. 3 Months"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg
                            focus:outline-none focus:ring-2 focus:ring-purple-400
-                           text-sm sm:text-base"
+                           text-sm sm:text-base text-black"
               />
             </div>
 

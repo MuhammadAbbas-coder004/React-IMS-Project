@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { auth, db } from "../../config/firebaseconfig/firebaseconfig";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 
 const Login = () => {
@@ -10,12 +10,14 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleLogin = async (event) => {
     event.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -36,7 +38,9 @@ const Login = () => {
         : navigate("/profile");
     } catch (err) {
       console.error(err);
-      setError("Login failed. Check email and password.");
+      setError(err.message || "Login failed. Check email and password.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,7 +71,7 @@ const Login = () => {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+              className="w-full px-4 py-3 rounded-xl border border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition text-black"
               required
             />
           </div>
@@ -82,7 +86,7 @@ const Login = () => {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-indigo-500 transition pr-12"
+              className="w-full px-4 py-3 rounded-xl border border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition pr-12 text-black"
               required
             />
             {/* EYE ICON - ADJUSTED VERTICAL POSITION */}
@@ -98,11 +102,25 @@ const Login = () => {
           {/* BUTTON */}
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold text-lg hover:scale-[1.02] hover:shadow-lg transition-all duration-300"
+            disabled={loading}
+            className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold text-lg hover:scale-[1.02] hover:shadow-lg transition-all duration-300 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Login
+            {loading ? (
+              <span className="loading loading-spinner loading-md"></span>
+            ) : (
+              "Login"
+            )}
           </button>
         </form>
+
+        <div className="text-center mt-6">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-indigo-600 font-bold hover:underline">
+              Create Account
+            </Link>
+          </p>
+        </div>
 
         {/* FOOTER */}
         <p className="text-center text-xs text-gray-500 mt-6">
